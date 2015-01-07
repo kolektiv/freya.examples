@@ -42,7 +42,9 @@ open Freya.Types.Http
    being matched which has an id, so it can be considered safe in this context. *)
 
 let id =
-    memoM ((Option.get >> Guid.Parse) <!> getPLM (Route.valuesKey "id"))
+    freya {
+        let! id = getPLM (Route.valuesKey "id")
+        return (Option.get >> Guid.Parse) id } |> memoM
 
 (* Body Properties
 
@@ -68,22 +70,33 @@ let patchTodo =
    request, allowing us to use them as part of multiple decisions safely. *)
 
 let add =
-    memoM (asyncM addTodo =<< (Option.get <!> newTodo))
+    freya {
+        let! newTodo = newTodo
+        return! (asyncM addTodo) newTodo.Value } |> memoM
 
 let clear =
-    memoM (asyncM clearTodos =<< returnM ())
+    freya {
+        return! (asyncM clearTodos) () } |> memoM
 
 let delete =
-    memoM (asyncM deleteTodo =<< id)
+    freya {
+        let! id = id
+        return! (asyncM deleteTodo) id } |> memoM
 
 let get =
-    memoM (asyncM getTodo =<< id)
+    freya {
+        let! id = id
+        return! (asyncM getTodo) id } |> memoM
 
 let list =
-    memoM (asyncM listTodos =<< returnM ())
+    freya {
+        return! (asyncM listTodos) () } |> memoM
 
 let update =
-    memoM (asyncM updateTodo =<< (tuple <!> id <*> (Option.get <!> patchTodo)))
+    freya {
+        let! id = id
+        let! patchTodo = patchTodo
+        return! (asyncM updateTodo) (id, patchTodo.Value) } |> memoM
 
 (* Machine
 
@@ -99,25 +112,39 @@ let update =
    the second for an individual Todo. *)
 
 let addAction =
-    ignore <!> add
+    freya {
+        let! _ = add
+        return () }
 
 let addedHandler _ =
-    represent <!> add
+    freya {
+        let! todo = add
+        return represent todo }
 
 let clearAction =
-    ignore <!> clear
+    freya {
+        let! _ = clear
+        return () }
 
 let deleteAction =
-    ignore <!> delete
+    freya {
+        let! _ = delete
+        return () }
 
 let getHandler _ =
-    represent <!> get
+    freya {
+        let! todo = get
+        return represent todo }
 
 let listHandler _ =
-    represent <!> list
+    freya {
+        let! todos = list
+        return represent todos }
 
 let updateAction =
-    ignore <!> update
+    freya {
+        let! _ = update
+        return () }
 
 let common =
     freyaMachine {

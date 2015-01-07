@@ -43,23 +43,28 @@ let tuple x y =
 
    It's often useful/neater when working with freya to write some shorthand
    properties for some of the arguments to freyaMachine computation operations.
-   It saves having to use (returnM ...) in multiple places within the
+   It saves having to use (freya { ... }) in multiple places within the
    computation expression, which can reduce duplication and help readability. *)
 
 let corsOrigins =
-    returnM AccessControlAllowOriginRange.Any
+    freya {
+        return AccessControlAllowOriginRange.Any }
 
 let corsHeaders =
-    returnM [ "accept"; "content-type" ]
+    freya {
+        return [ "accept"; "content-type" ] }
 
 let en =
-    returnM [ LanguageTag.Parse "en" ]
+    freya {
+        return [ LanguageTag.Parse "en" ] }
 
 let json =
-    returnM [ MediaType.JSON ]
+    freya {
+        return [ MediaType.JSON ] }
 
 let utf8 =
-    returnM [ Charset.UTF8 ]
+    freya {
+        return [ Charset.UTF8 ] }
 
 (* Request Body Helper
 
@@ -67,20 +72,27 @@ let utf8 =
    a request, as it's usually very specific to an application, and the Freya
    way is to let the developer choose the most suitable approach.
 
-   We've used
-   Fleece in this example, so we can use that to define the body function
-   below, which (following from Fleece) uses static inference to determine
-   the type of return value needed. *)
+   We've used Fleece in this example, so we can use that to define the body
+   function below, which (following from Fleece) uses static inference to
+   determine the type of return value needed. *)
 
 let readStream (x: Stream) =
     use reader = new StreamReader (x)
     reader.ReadToEnd ()
 
 let readBody =
-    readStream <!> getLM Request.body
+    freya {
+        let! body = getLM Request.body
+
+        return readStream body }
 
 let inline body () =
-    (function | Choice1Of2 x -> Some x | _ -> None) <!> (parseJSON <!> readBody)
+    freya {
+        let! body = readBody
+
+        match parseJSON body with
+        | Choice1Of2 x -> return Some x
+        | _ -> return None }
 
 (* Content Negotiation/Representation Helper
 
