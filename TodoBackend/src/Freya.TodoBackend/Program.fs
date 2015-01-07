@@ -23,13 +23,24 @@ module Freya.TodoBackend.Program
 open Freya.Core
 open Microsoft.Owin.Hosting
 
-// Katana Compatible Type
+(* Katana
+
+   Katana (Owin Self Hosting) expects us to expose a type with a specific
+   method. Freya lets us do see easily, the OwinAppFunc module providing
+   functions to turn any Freya<'a> function in to a suitable value for
+   OWIN compatible hosts such as Katana. *)
 
 type TodoBackend () =
     member __.Configuration () =
         OwinAppFunc.fromFreya (api)
 
-// Main
+(* Main
+
+   A very simple program, simply a console app, with a blocking read from
+   the console to keep our server from shutting down immediately. Though
+   we are self hosting here as a console application, the same application
+   should be easily transferrable to any OWIN compatible server, including
+   IIS. *)
 
 [<EntryPoint>]
 let main _ = 

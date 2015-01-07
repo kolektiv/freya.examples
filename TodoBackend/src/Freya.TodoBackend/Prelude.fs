@@ -87,10 +87,9 @@ let inline body () =
    Freya is also agnostic about data serialization in the response direction as
    well, believing it to be a choice for the developer.
 
-   Here we've taken a simple
-   approach, defining a function which always returns UTF-8 encoded JSON, English
-   language, provided that the object returned can be serialized to JSON using
-   Fleece. *)
+   Here we've taken a simple approach, defining a function which always returns
+   UTF-8 encoded JSON, English language, provided that the argument can
+   be serialized to JSON using Fleece. *)
 
 let inline represent x =
     { Metadata =

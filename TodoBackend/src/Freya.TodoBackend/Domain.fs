@@ -27,7 +27,15 @@ open Fleece
 open Fleece.Operators
 open FSharpPlus
 
-// Types
+(* Types
+
+   We model our domain using some simple record types, including typed
+   models for request bodies. Note that these only support serialization FROM
+   JSON, while our Todo type itself only supports serialization TO JSON.
+
+   This is quite a nice example of how having control over data at a fine
+   grained level can be useful - there's no code anywhere that we don't need,
+   and we can see exactly what's going on. *)
 
 type NewTodo =
     { Title: string
@@ -73,7 +81,11 @@ type Todo =
             "title" .= x.Title
             "completed" .= x.Completed ]
 
-// Constructors
+(* Constructors
+
+   We often need constructor functions (or in this case, more
+   accurately a mapping function) and they help keep code concise in examples
+   such as this. *)
 
 let todo (x: NewTodo) =
     let id = Guid.NewGuid ()
@@ -84,7 +96,16 @@ let todo (x: NewTodo) =
       Title = x.Title
       Completed = false }
 
-// Storage
+(* Storage
+
+   In this case we'll model our actual store as a very simple in memory approach,
+   using an F# MailboxProcessor. This actually gives us something quite close
+   to what we'd encounter in a lot of real world projects - an asynchronous API
+   that we need to use from our Freya specific code.
+
+   We use a lens here for modification of our state, don't worry too much about
+   the internals of this. How to build a small agent-like store isn't really the goal
+   of this example! *)
 
 type StorageState =
     { Todos: Map<Guid, Todo> }
@@ -102,8 +123,6 @@ type StorageProtocol =
 
 let private reply (chan: AsyncReplyChannel<_>) x =
     chan.Reply (x); x
-
-// Storage Operations
 
 let private add chan newTodo =
     newTodo
@@ -134,56 +153,60 @@ let private list chan state =
     |> reply chan
     |> (fun _ -> state)
 
-let private update id (x: PatchTodo) (chan: AsyncReplyChannel<Todo>) state =
+let private update (chan: AsyncReplyChannel<Todo>) id (patchTodo: PatchTodo) state =
     let todo = Map.find id state.Todos
 
     let todo = (function | Some t -> { todo with Title = t } 
-                         | _ -> todo) x.Title
+                         | _ -> todo) patchTodo.Title
     let todo = (function | Some o -> { todo with Order = Some o } 
-                         | _ -> todo) x.Order
+                         | _ -> todo) patchTodo.Order
     let todo = (function | Some c -> { todo with Completed = c } 
-                         | _ -> todo) x.Completed
+                         | _ -> todo) patchTodo.Completed
 
     chan.Reply (todo)
     { state with Todos = Map.add id todo state.Todos }
 
-let private makeStorage () = MailboxProcessor.Start (fun mbox ->
-    let rec loop (state: StorageState) =
-        async {
-            let! protocol = mbox.Receive ()
+let private makeStorage () = 
+    MailboxProcessor.Start (fun mbox ->
+        let rec loop (state: StorageState) =
+            async {
+                let! protocol = mbox.Receive ()
 
-            let action =
-                match protocol with
-                | Add (newTodo, chan) -> add chan newTodo
-                | Clear (chan) -> clear chan
-                | Delete (id, chan) -> delete chan id
-                | Get (id, chan) -> get chan id
-                | List (chan) -> list chan
-                | Update (id, x, chan) -> update id x chan
+                let action =
+                    match protocol with
+                    | Add (newTodo, chan) -> add chan newTodo
+                    | Clear (chan) -> clear chan
+                    | Delete (id, chan) -> delete chan id
+                    | Get (id, chan) -> get chan id
+                    | List (chan) -> list chan
+                    | Update (id, patchTodo, chan) -> update chan id patchTodo
                 
-            return! loop (action state) }
+                return! loop (action state) }
 
-    loop { Todos = Map.empty })
+        loop { Todos = Map.empty })
 
 let private store =
     makeStorage ()
 
-// API
+(* API
 
-let addTodo x =
-    store.PostAndAsyncReply (fun c -> Add (x, c))
+   Our actual storage API is a very simple collection of async functions
+   which should be quite self explanatory. *)
+
+let addTodo newTodo =
+    store.PostAndAsyncReply (fun chan -> Add (newTodo, chan))
 
 let clearTodos () =
-    store.PostAndAsyncReply (fun c -> Clear (c))
+    store.PostAndAsyncReply (fun chan -> Clear (chan))
 
 let deleteTodo id =
-    store.PostAndAsyncReply (fun c -> Delete (id, c))
+    store.PostAndAsyncReply (fun chan -> Delete (id, chan))
 
 let getTodo id =
-    store.PostAndAsyncReply (fun c -> Get (id, c))
+    store.PostAndAsyncReply (fun chan -> Get (id, chan))
 
 let listTodos () =
-    store.PostAndAsyncReply (fun c -> List (c))
+    store.PostAndAsyncReply (fun chan -> List (chan))
 
-let updateTodo (id, x) =
-    store.PostAndAsyncReply (fun c -> Update (id, x, c))
+let updateTodo (id, patchTodo) =
+    store.PostAndAsyncReply (fun chan -> Update (id, patchTodo, chan))
