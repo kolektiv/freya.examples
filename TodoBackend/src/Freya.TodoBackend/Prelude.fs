@@ -23,11 +23,11 @@ module Freya.TodoBackend.Prelude
 
 open System.IO
 open System.Text
-open Fleece
+open Chiron
 open Freya.Core
 open Freya.Core.Operators
 open Freya.Machine
-open Freya.Types.Cors
+open Freya.Machine.Extensions.Http
 open Freya.Types.Http
 open Freya.Types.Language
 
@@ -46,25 +46,11 @@ let tuple x y =
    It saves having to use (freya { ... }) in multiple places within the
    computation expression, which can reduce duplication and help readability. *)
 
-let corsOrigins =
-    freya {
-        return AccessControlAllowOriginRange.Any }
+let en = Freya.init [ LanguageTag.Parse "en" ]
 
-let corsHeaders =
-    freya {
-        return [ "accept"; "content-type" ] }
+let json = Freya.init [ MediaType.Json ]
 
-let en =
-    freya {
-        return [ LanguageTag.Parse "en" ] }
-
-let json =
-    freya {
-        return [ MediaType.JSON ] }
-
-let utf8 =
-    freya {
-        return [ Charset.UTF8 ] }
+let utf8 = Freya.init [ Charset.Utf8 ]
 
 (* Request Body Helper
 
@@ -72,27 +58,26 @@ let utf8 =
    a request, as it's usually very specific to an application, and the Freya
    way is to let the developer choose the most suitable approach.
 
-   We've used Fleece in this example, so we can use that to define the body
-   function below, which (following from Fleece) uses static inference to
+   We've used Chiron in this example, so we can use that to define the body
+   function below, which (following from Chiron) uses static inference to
    determine the type of return value needed. *)
 
 let readStream (x: Stream) =
     use reader = new StreamReader (x)
-    reader.ReadToEnd ()
+    reader.ReadToEndAsync()
+    |> Async.AwaitTask
 
 let readBody =
     freya {
-        let! body = getLM Request.body
+        let! body = Freya.getLens Request.body
 
-        return readStream body }
+        return! Freya.fromAsync readStream body }
 
 let inline body () =
     freya {
         let! body = readBody
 
-        match parseJSON body with
-        | Choice1Of2 x -> return Some x
-        | _ -> return None }
+        return (Json.tryParse body |> Option.bind Json.tryDeserialize) }
 
 (* Content Negotiation/Representation Helper
 
@@ -101,12 +86,12 @@ let inline body () =
 
    Here we've taken a simple approach, defining a function which always returns
    UTF-8 encoded JSON, English language, provided that the argument can
-   be serialized to JSON using Fleece. *)
+   be serialized to JSON using Chiron. *)
 
 let inline represent x =
-    { Metadata =
-        { Charset = Some Charset.UTF8
+    { Description =
+        { Charset = Some Charset.Utf8
           Encodings = None
-          MediaType = Some MediaType.JSON
+          MediaType = Some MediaType.Json
           Languages = Some [ LanguageTag.Parse "en" ] }
-      Data = (toJSON >> string >> Encoding.UTF8.GetBytes) x }
+      Data = (Json.serialize >> Json.format >> Encoding.UTF8.GetBytes) x }

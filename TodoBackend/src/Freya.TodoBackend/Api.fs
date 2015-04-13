@@ -18,16 +18,22 @@
 //
 //----------------------------------------------------------------------------
 
-[<AutoOpen>]
 module Freya.TodoBackend.Api
 
 open System
 open Freya.Core
-open Freya.Core.Operators
+open Freya.Inspector
 open Freya.Machine
+open Freya.Machine.Extensions.Http
+open Freya.Machine.Extensions.Http.Cors
+open Freya.Machine.Inspector
 open Freya.Machine.Router
+open Freya.Pipeline.Operators
 open Freya.Router
+open Freya.Router.Inspector
 open Freya.Types.Http
+open Freya.Types.Http.Cors
+open Freya.TodoBackend.Domain
 
 (* Route Properties
 
@@ -43,8 +49,8 @@ open Freya.Types.Http
 
 let id =
     freya {
-        let! id = getPLM (Route.valuesKey "id")
-        return (Option.get >> Guid.Parse) id } |> memoM
+        let! id = Freya.getLensPartial (Route.valuesKey "id")
+        return (Option.get >> Guid.Parse) id } |> Freya.memo
 
 (* Body Properties
 
@@ -53,50 +59,50 @@ let id =
    inferring the type to be returned from the context in which they're used. *)
 
 let newTodo =
-    memoM (body ())
+    Freya.memo (body ())
 
 let patchTodo =
-    memoM (body ())
+    Freya.memo (body ())
 
 (* Domain Operations
 
-   Here we can see that we wrap the domain api, turning the functions in to
-   Freya<'a> functions using asyncM, and passing properties of the request
+   Here we can see that we wrap the domain api, turning the functions into
+   Freya<'a> functions using fromAsync and passing properties of the request
    to the functions.
 
    Again, we memoize the results as we don't need (or wish)
-   to evaluate these more than once  per request - by memoizing here we can
+   to evaluate these more than once per request. By memoizing we can
    guarantee that these functions are idempotent within the scope of a
    request, allowing us to use them as part of multiple decisions safely. *)
 
 let add =
     freya {
         let! newTodo = newTodo
-        return! (asyncM addTodo) newTodo.Value } |> memoM
+        return! (Freya.fromAsync addTodo) newTodo.Value } |> Freya.memo
 
 let clear =
     freya {
-        return! (asyncM clearTodos) () } |> memoM
+        return! (Freya.fromAsync clearTodos) () } |> Freya.memo
 
 let delete =
     freya {
         let! id = id
-        return! (asyncM deleteTodo) id } |> memoM
+        return! (Freya.fromAsync deleteTodo) id } |> Freya.memo
 
 let get =
     freya {
         let! id = id
-        return! (asyncM getTodo) id } |> memoM
+        return! (Freya.fromAsync getTodo) id } |> Freya.memo
 
 let list =
     freya {
-        return! (asyncM listTodos) () } |> memoM
+        return! (Freya.fromAsync listTodos) () } |> Freya.memo
 
 let update =
     freya {
         let! id = id
         let! patchTodo = patchTodo
-        return! (asyncM updateTodo) (id, patchTodo.Value) } |> memoM
+        return! (Freya.fromAsync updateTodo) (id, patchTodo.Value) } |> Freya.memo
 
 (* Machine
 
@@ -146,8 +152,19 @@ let updateAction =
         let! _ = update
         return () }
 
+let corsOrigins =
+    freya {
+        return AccessControlAllowOriginRange.Any }
+
+let corsHeaders =
+    freya {
+        return [ "accept"
+                 "content-type" ] }
+
 let common =
     freyaMachine {
+        using http
+        using httpCors
         charsetsSupported utf8
         corsHeadersSupported corsHeaders
         corsOriginsSupported corsOrigins
@@ -155,11 +172,10 @@ let common =
         mediaTypesSupported json }
 
 let todosMethods =
-    returnM [ 
-        DELETE
-        GET
-        OPTIONS
-        POST ]
+    Freya.init [ DELETE
+                 GET
+                 OPTIONS
+                 POST ]
 
 let todos =
     freyaMachine {
@@ -169,14 +185,13 @@ let todos =
         doDelete clearAction
         doPost addAction
         handleCreated addedHandler
-        handleOk listHandler } |> compileFreyaMachine
+        handleOk listHandler } |> FreyaMachine.toPipeline
 
 let todoMethods =
-    returnM [
-        DELETE
-        GET
-        OPTIONS
-        PATCH ]
+    Freya.init [ DELETE
+                 GET
+                 OPTIONS
+                 Method.Custom "PATCH" ]
 
 let todo =
     freyaMachine {
@@ -185,7 +200,7 @@ let todo =
         methodsSupported todoMethods
         doDelete deleteAction
         doPatch updateAction
-        handleOk getHandler } |> compileFreyaMachine
+        handleOk getHandler } |> FreyaMachine.toPipeline
 
 (* Router
 
@@ -197,7 +212,18 @@ let todo =
 let todoRoutes =
     freyaRouter {
         resource "/" todos
-        resource "/:id" todo } |> compileFreyaRouter
+        resource "/:id" todo } |> FreyaRouter.toPipeline
+
+(* Inspectors *)
+
+let config =
+    { Inspectors = 
+        [ freyaRequestInspector
+          freyaMachineInspector
+          freyaRouterInspector ] }
+
+let inspect =
+    freyaInspector config
 
 (* API
 
@@ -206,4 +232,4 @@ let todoRoutes =
    to form a more complex whole, but in this case we only have our single router. *)
 
 let api =
-    todoRoutes
+    inspect >?= todoRoutes
