@@ -76,6 +76,6 @@ let files : FreyaPipeline =
     freyaMachine {
         including defaults
         mediaTypesSupported mediaTypesConfiguration
-        lastModified lastModifiedConfiguration
+        //lastModified lastModifiedConfiguration
         exists existsDecision
         handleOk fileHandler } |> FreyaMachine.toPipeline
