@@ -8,9 +8,6 @@ open Freya.Pipeline
 open Freya.Types.Http
 open Freya.Machine.Extensions.Http
 
-let root =
-    DirectoryInfo (__SOURCE_DIRECTORY__ + @"\..\..\root")
-
 let getFileInfo (path: string) =
     let filePath = Path.Combine (root.FullName, path.Trim ([| '/' |]))
     let fileInfo = FileInfo (filePath)

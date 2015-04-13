@@ -23,9 +23,9 @@ type FileServer () =
         OwinAppFunc.ofFreya (app)
 
 // Main
-
 [<EntryPoint>]
 let main _ = 
     let _ = WebApp.Start<FileServer> ("http://localhost:7000")
+    printfn "Listening on port 7000 and looking in %s" Prelude.root.FullName
     let _ = System.Console.ReadLine ()
     0

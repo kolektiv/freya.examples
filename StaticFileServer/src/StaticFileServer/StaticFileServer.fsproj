@@ -54,6 +54,7 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
+    <Compile Include="Prelude.fs" />
     <Compile Include="Stage1.fs" />
     <Compile Include="Stage2.fs" />
     <Compile Include="Stage3.fs" />
