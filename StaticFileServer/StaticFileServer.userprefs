@@ -1,0 +1,16 @@
+﻿<Properties StartupItem="src/StaticFileServer/StaticFileServer.fsproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="src/StaticFileServer/Stage4.fs">
+    <Files>
+      <File FileName="src/StaticFileServer/Program.fs" Line="1" Column="1" />
+      <File FileName="src/StaticFileServer/Stage1.fs" Line="1" Column="1" />
+      <File FileName="src/StaticFileServer/Stage3.fs" Line="1" Column="1" />
+      <File FileName="src/StaticFileServer/Stage5.fs" Line="1" Column="1" />
+      <File FileName="src/StaticFileServer/Stage4.fs" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
