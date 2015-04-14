@@ -14,7 +14,7 @@ let config =
           freyaMachineInspector ] }
 
 let app =
-    freyaInspector config >?= Stage1.files
+    freyaInspector config >?= Stage4.files
 
 // Katana
 

@@ -17,14 +17,6 @@ let getFileInfo (path: string) =
 let readFile (file: FileInfo) =
     File.ReadAllBytes (file.FullName)
 
-// Defaults
-
-let defaults =
-    freyaMachine {
-        using http
-        methodsSupported (Freya.init [ GET ]) }
-
-
 // Resources
 
 let files : FreyaPipeline =

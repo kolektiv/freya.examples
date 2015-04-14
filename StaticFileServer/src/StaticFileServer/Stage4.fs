@@ -60,13 +60,6 @@ let fileHandler n =
 let mediaTypesConfiguration =
     fileType
 
-// Defaults
-
-let defaults =
-    freyaMachine {
-        using http
-        methodsSupported (Freya.init [ GET ]) }
-
 // Resources
 
 let files : FreyaPipeline =

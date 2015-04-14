@@ -46,13 +46,6 @@ let existsDecision =
 let fileHandler n =
     represent n <!> file
 
-// Defaults
-
-let defaults =
-    freyaMachine {
-        using http
-        methodsSupported (Freya.init [ GET ]) }
-
 // Resources
 
 let files : FreyaPipeline =
