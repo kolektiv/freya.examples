@@ -16,5 +16,4 @@ let root =
 let defaults =
     freyaMachine {
         using http
-        methodsSupported (Freya.init [ GET ]) }
-
+        methodsSupported (Freya.init [ GET; HEAD ]) }

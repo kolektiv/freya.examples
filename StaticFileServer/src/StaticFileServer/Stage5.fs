@@ -47,7 +47,7 @@ let file =
 
 let fileType =
     Freya.memo ((function | (x: FileInfo) when x.Exists -> [ Map.find x.Extension fileTypes ]
-                          | _ -> []) <!> fileInfo)
+                          | _ -> [ MediaType.Text ]) <!> fileInfo)
 
 // Machine
 
