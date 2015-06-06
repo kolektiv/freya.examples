@@ -23,13 +23,41 @@ module Freya.TodoBackend.Prelude
 
 open System.IO
 open System.Text
+open Arachne.Http
+open Arachne.Language
 open Chiron
 open Freya.Core
 open Freya.Core.Operators
+open Freya.Lenses.Http
 open Freya.Machine
 open Freya.Machine.Extensions.Http
-open Freya.Types.Http
-open Freya.Types.Language
+
+module Either =
+    let Success = Choice1Of2
+    let Failure = Choice2Of2
+
+    let (|Success|Failure|) m =
+        match m with
+        | Choice1Of2 x -> Success x
+        | Choice2Of2 x -> Failure x
+
+    let bind f m =
+        match m with
+        | Success x -> f x
+        | Failure err -> Failure err
+
+    let apply f m =
+        match f, m with
+        | Success f', Success m' -> Success <| f' m'
+        | Failure e1, Failure e2 -> Failure <| String.concat System.Environment.NewLine [e1; e2]
+        | Failure e1, _ -> Failure e1
+        | _, Failure e2 -> Failure e2
+
+    let map f m =
+        bind (f >> Success) m
+
+    let toOption =
+        function Success x -> Some x | _ -> None
 
 (* Utility
 
@@ -70,14 +98,12 @@ let readStream (x: Stream) =
 let readBody =
     freya {
         let! body = Freya.getLens Request.body
-
         return! Freya.fromAsync readStream body }
 
 let inline body () =
     freya {
         let! body = readBody
-
-        return (Json.tryParse body |> Option.bind Json.tryDeserialize) }
+        return (Json.tryParse body |> Either.bind Json.tryDeserialize |> Either.toOption) }
 
 (* Content Negotiation/Representation Helper
 

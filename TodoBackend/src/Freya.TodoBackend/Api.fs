@@ -21,18 +21,19 @@
 module Freya.TodoBackend.Api
 
 open System
+open Arachne.Http
+open Arachne.Http.Cors
+open Arachne.Uri.Template
 open Freya.Core
+open Freya.Core.Operators
 open Freya.Inspector
 open Freya.Machine
 open Freya.Machine.Extensions.Http
 open Freya.Machine.Extensions.Http.Cors
 open Freya.Machine.Inspector
 open Freya.Machine.Router
-open Freya.Pipeline.Operators
 open Freya.Router
 open Freya.Router.Inspector
-open Freya.Types.Http
-open Freya.Types.Http.Cors
 open Freya.TodoBackend.Domain
 
 (* Route Properties
@@ -49,7 +50,7 @@ open Freya.TodoBackend.Domain
 
 let id =
     freya {
-        let! id = Freya.getLensPartial (Route.valuesKey "id")
+        let! id = Freya.getLensPartial (Route.atom "id")
         return (Option.get >> Guid.Parse) id } |> Freya.memo
 
 (* Body Properties
@@ -211,8 +212,8 @@ let todo =
 
 let todoRoutes =
     freyaRouter {
-        resource "/" todos
-        resource "/:id" todo } |> FreyaRouter.toPipeline
+        resource (UriTemplate.Parse "/") todos
+        resource (UriTemplate.Parse "/{id}") todo } |> FreyaRouter.toPipeline
 
 (* Inspectors *)
 
