@@ -131,6 +131,8 @@ let corsHeaders =
 
 let common =
     freyaMachine {
+        using http
+        using httpCors
         charsetsSupported utf8
         corsHeadersSupported corsHeaders
         corsOriginsSupported corsOrigins
