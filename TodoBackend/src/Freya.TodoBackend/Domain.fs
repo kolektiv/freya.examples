@@ -18,14 +18,12 @@
 //
 //----------------------------------------------------------------------------
 
-[<AutoOpen>]
 module Freya.TodoBackend.Domain
 
 open System
 open Aether
-open Fleece
-open Fleece.Operators
-open FSharpPlus
+open Chiron
+open Chiron.Operators
 
 (* Types
 
@@ -41,30 +39,26 @@ type NewTodo =
     { Title: string
       Order: int option }
 
-    static member FromJSON (_: NewTodo) =
-        function | JObject o ->                    
-                        (fun t o -> { Title = t
-                                      Order = o }) 
-                    <!> (o .@  "title")
-                    <*> (o .@? "order") 
-                 | _ -> 
-                    Failure ("Invalid NewTodo")
+    static member FromJson (_: NewTodo) =
+            fun t o ->
+                { Title = t
+                  Order = o }
+        <!> Json.read "title"
+        <*> Json.tryRead "order"
 
 type PatchTodo =
     { Title: string option
       Order: int option
       Completed: bool option }
 
-    static member FromJSON (_: PatchTodo) =
-        function | JObject o ->
-                        (fun t o c -> { Title = t
-                                        Order = o
-                                        Completed = c })
-                    <!> (o .@? "title")
-                    <*> (o .@? "order")
-                    <*> (o .@? "completed")
-                 | _ ->
-                    Failure ("Invalid PatchTodo")
+    static member FromJson (_: PatchTodo) =
+            fun t o c ->
+                { Title = t
+                  Order = o
+                  Completed = c }
+        <!> Json.tryRead "title"
+        <*> Json.tryRead "order"
+        <*> Json.tryRead "completed"
 
 type Todo =
     { Id: Guid
@@ -73,13 +67,12 @@ type Todo =
       Title: string
       Completed: bool }
 
-    static member ToJSON (x: Todo) =
-        jobj [
-            "id" .= x.Id
-            "url" .= x.Url
-            "order" .= x.Order
-            "title" .= x.Title
-            "completed" .= x.Completed ]
+    static member ToJson (x: Todo) =
+            Json.write "id" x.Id
+         *> Json.write "url" x.Url
+         *> Json.write "order" x.Order
+         *> Json.write "title" x.Title
+         *> Json.write "completed" x.Completed
 
 (* Constructors
 
@@ -91,7 +84,7 @@ let todo (x: NewTodo) =
     let id = Guid.NewGuid ()
 
     { Id = id
-      Url = sprintf "http://localhost:7000/%A" id
+      Url = sprintf "http://localhost:7000/%A" id // TODO: should partially apply this URI template
       Order = x.Order
       Title = x.Title
       Completed = false }
@@ -128,26 +121,26 @@ let private add chan newTodo =
     newTodo
     |> todo
     |> reply chan
-    |> (fun todo -> modL StorageState.TodosLens (Map.add todo.Id todo))
+    |> (fun todo -> Lens.map StorageState.TodosLens (Map.add todo.Id todo))
 
 let private clear chan =
     ()
     |> reply chan
-    |> (fun () -> setL StorageState.TodosLens Map.empty)
+    |> (fun () -> Lens.set StorageState.TodosLens Map.empty)
 
 let private delete chan id =
     ()
     |> reply chan
-    |> (fun _ -> modL StorageState.TodosLens (Map.remove id))
+    |> (fun _ -> Lens.map StorageState.TodosLens (Map.remove id))
 
 let private get chan id state =
-    getL StorageState.TodosLens state
+    Lens.get StorageState.TodosLens state
     |> Map.tryFind id
     |> reply chan
     |> (fun _ -> state)
 
 let private list chan state =
-    getL StorageState.TodosLens state
+    Lens.get StorageState.TodosLens state
     |> Map.toList
     |> List.map snd
     |> reply chan

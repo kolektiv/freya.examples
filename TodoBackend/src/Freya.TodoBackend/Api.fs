@@ -18,16 +18,20 @@
 //
 //----------------------------------------------------------------------------
 
-[<AutoOpen>]
 module Freya.TodoBackend.Api
 
 open System
+open Arachne.Http
+open Arachne.Http.Cors
+open Arachne.Uri.Template
 open Freya.Core
 open Freya.Core.Operators
 open Freya.Machine
+open Freya.Machine.Extensions.Http
+open Freya.Machine.Extensions.Http.Cors
 open Freya.Machine.Router
 open Freya.Router
-open Freya.Types.Http
+open Freya.TodoBackend.Domain
 
 (* Route Properties
 
@@ -42,7 +46,7 @@ open Freya.Types.Http
    being matched which has an id, so it can be considered safe in this context. *)
 
 let id =
-    memoM ((Option.get >> Guid.Parse) <!> getPLM (Route.valuesKey "id"))
+    Freya.memo ((Option.get >> Guid.Parse) <!> Freya.getLensPartial (Route.atom "id"))
 
 (* Body Properties
 
@@ -51,15 +55,15 @@ let id =
    inferring the type to be returned from the context in which they're used. *)
 
 let newTodo =
-    memoM (body ())
+    Freya.memo (body ())
 
 let patchTodo =
-    memoM (body ())
+    Freya.memo (body ())
 
 (* Domain Operations
 
    Here we can see that we wrap the domain api, turning the functions in to
-   Freya<'a> functions using asyncM, and passing properties of the request
+   Freya<'a> functions using Freya.fromAsync, and passing properties of the request
    to the functions.
 
    Again, we memoize the results as we don't need (or wish)
@@ -68,22 +72,22 @@ let patchTodo =
    request, allowing us to use them as part of multiple decisions safely. *)
 
 let add =
-    memoM (asyncM addTodo =<< (Option.get <!> newTodo))
+    Freya.memo (Freya.fromAsync addTodo =<< (Option.get <!> newTodo))
 
 let clear =
-    memoM (asyncM clearTodos =<< returnM ())
+    Freya.memo (Freya.fromAsync clearTodos =<< Freya.init ())
 
 let delete =
-    memoM (asyncM deleteTodo =<< id)
+    Freya.memo (Freya.fromAsync deleteTodo =<< id)
 
 let get =
-    memoM (asyncM getTodo =<< id)
+    Freya.memo (Freya.fromAsync getTodo =<< id)
 
 let list =
-    memoM (asyncM listTodos =<< returnM ())
+    Freya.memo (Freya.fromAsync listTodos =<< Freya.init ())
 
 let update =
-    memoM (asyncM updateTodo =<< (tuple <!> id <*> (Option.get <!> patchTodo)))
+    Freya.memo (Freya.fromAsync updateTodo =<< (tuple <!> id <*> (Option.get <!> patchTodo)))
 
 (* Machine
 
@@ -119,6 +123,12 @@ let listHandler _ =
 let updateAction =
     ignore <!> update
 
+let corsOrigins =
+    Freya.init AccessControlAllowOriginRange.Any
+
+let corsHeaders =
+    Freya.init [ "accept"; "content-type" ]
+
 let common =
     freyaMachine {
         charsetsSupported utf8
@@ -128,7 +138,7 @@ let common =
         mediaTypesSupported json }
 
 let todosMethods =
-    returnM [ 
+    Freya.init [ 
         DELETE
         GET
         OPTIONS
@@ -142,14 +152,14 @@ let todos =
         doDelete clearAction
         doPost addAction
         handleCreated addedHandler
-        handleOk listHandler } |> compileFreyaMachine
+        handleOk listHandler } |> FreyaMachine.toPipeline
 
 let todoMethods =
-    returnM [
+    Freya.init [
         DELETE
         GET
         OPTIONS
-        PATCH ]
+        Method.Custom "PATCH" ]
 
 let todo =
     freyaMachine {
@@ -158,7 +168,7 @@ let todo =
         methodsSupported todoMethods
         doDelete deleteAction
         doPatch updateAction
-        handleOk getHandler } |> compileFreyaMachine
+        handleOk getHandler } |> FreyaMachine.toPipeline
 
 (* Router
 
@@ -169,8 +179,8 @@ let todo =
 
 let todoRoutes =
     freyaRouter {
-        resource "/" todos
-        resource "/:id" todo } |> compileFreyaRouter
+        resource (UriTemplate.Parse "/") todos
+        resource (UriTemplate.Parse "/{id}") todo } |> FreyaRouter.toPipeline
 
 (* API
 
