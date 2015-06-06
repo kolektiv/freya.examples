@@ -1,9 +1,9 @@
 ﻿module StaticFileServer.Program
 
 open Freya.Core
+open Freya.Core.Operators
 open Freya.Inspector
 open Freya.Machine.Inspector
-open Freya.Pipeline.Operators
 open Microsoft.Owin.Hosting
 
 // App
@@ -20,7 +20,7 @@ let app =
 
 type FileServer () =
     member __.Configuration () =
-        OwinAppFunc.ofFreya (app)
+        OwinAppFunc.ofFreya app
 
 // Main
 [<EntryPoint>]

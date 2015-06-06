@@ -69,8 +69,32 @@
       <HintPath>..\..\packages\Aether.6.0\lib\net40\Aether.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Arachne.Core">
+      <HintPath>..\..\packages\Arachne.Core.1.0.7\lib\net45\Arachne.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Arachne.Http">
+      <HintPath>..\..\packages\Arachne.Http.1.0.7\lib\net45\Arachne.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Arachne.Http.Cors">
+      <HintPath>..\..\packages\Arachne.Http.Cors.1.0.7\lib\net45\Arachne.Http.Cors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Arachne.Language">
+      <HintPath>..\..\packages\Arachne.Language.1.0.7\lib\net45\Arachne.Language.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Arachne.Uri">
+      <HintPath>..\..\packages\Arachne.Uri.1.0.7\lib\net45\Arachne.Uri.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Arachne.Uri.Template">
+      <HintPath>..\..\packages\Arachne.Uri.Template.1.0.7\lib\net45\Arachne.Uri.Template.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Chiron">
-      <HintPath>..\..\packages\Chiron.1.0.0\lib\net40\Chiron.dll</HintPath>
+      <HintPath>..\..\packages\Chiron.4.0.0\lib\net45\Chiron.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FParsec">
@@ -82,69 +106,45 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Freya.Core">
-      <HintPath>..\..\packages\Freya.Core.0.10.0-alpha-143\lib\net45\Freya.Core.dll</HintPath>
+      <HintPath>..\..\packages\Freya.Core.1.0.185\lib\net45\Freya.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Freya.Inspector">
       <HintPath>..\..\..\lib\Freya.Inspector.dll</HintPath>
     </Reference>
-    <Reference Include="Freya.Integration">
-      <HintPath>..\..\packages\Freya.Integration.0.10.0-alpha-143\lib\net45\Freya.Integration.dll</HintPath>
+    <Reference Include="Freya.Lenses.Http">
+      <HintPath>..\..\packages\Freya.Lenses.Http.1.0.185\lib\net45\Freya.Lenses.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Freya.Lenses.Http.Cors">
+      <HintPath>..\..\packages\Freya.Lenses.Http.Cors.1.0.185\lib\net45\Freya.Lenses.Http.Cors.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Freya.Machine">
-      <HintPath>..\..\packages\Freya.Machine.0.10.0-alpha-143\lib\net45\Freya.Machine.dll</HintPath>
+      <HintPath>..\..\packages\Freya.Machine.1.0.185\lib\net45\Freya.Machine.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Freya.Machine.Extensions.Http">
-      <HintPath>..\..\packages\Freya.Machine.Extensions.Http.0.10.0-alpha-143\lib\net45\Freya.Machine.Extensions.Http.dll</HintPath>
+      <HintPath>..\..\packages\Freya.Machine.Extensions.Http.1.0.185\lib\net45\Freya.Machine.Extensions.Http.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Freya.Machine.Extensions.Http.Cors">
-      <HintPath>..\..\packages\Freya.Machine.Extensions.Http.Cors.0.10.0-alpha-143\lib\net45\Freya.Machine.Extensions.Http.Cors.dll</HintPath>
+      <HintPath>..\..\packages\Freya.Machine.Extensions.Http.Cors.1.0.185\lib\net45\Freya.Machine.Extensions.Http.Cors.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Freya.Machine.Inspector">
       <HintPath>..\..\..\lib\Freya.Machine.Inspector.dll</HintPath>
     </Reference>
     <Reference Include="Freya.Machine.Router">
-      <HintPath>..\..\packages\Freya.Machine.Router.0.10.0-alpha-143\lib\net45\Freya.Machine.Router.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Freya.Pipeline">
-      <HintPath>..\..\packages\Freya.Pipeline.0.10.0-alpha-143\lib\net45\Freya.Pipeline.dll</HintPath>
+      <HintPath>..\..\packages\Freya.Machine.Router.1.0.185\lib\net45\Freya.Machine.Router.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Freya.Recorder">
-      <HintPath>..\..\packages\Freya.Recorder.0.10.0-alpha-143\lib\net45\Freya.Recorder.dll</HintPath>
+      <HintPath>..\..\packages\Freya.Recorder.1.0.185\lib\net45\Freya.Recorder.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Freya.Router">
-      <HintPath>..\..\packages\Freya.Router.0.10.0-alpha-143\lib\net45\Freya.Router.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Freya.Types">
-      <HintPath>..\..\packages\Freya.Types.0.10.0-alpha-143\lib\net45\Freya.Types.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Freya.Types.Http">
-      <HintPath>..\..\packages\Freya.Types.Http.0.10.0-alpha-143\lib\net45\Freya.Types.Http.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Freya.Types.Http.Cors">
-      <HintPath>..\..\packages\Freya.Types.Http.Cors.0.10.0-alpha-143\lib\net45\Freya.Types.Http.Cors.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Freya.Types.Language">
-      <HintPath>..\..\packages\Freya.Types.Language.0.10.0-alpha-143\lib\net45\Freya.Types.Language.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Freya.Types.Uri">
-      <HintPath>..\..\packages\Freya.Types.Uri.0.10.0-alpha-143\lib\net45\Freya.Types.Uri.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Freya.Types.Uri.Template">
-      <HintPath>..\..\packages\Freya.Types.Uri.Template.0.10.0-alpha-143\lib\net45\Freya.Types.Uri.Template.dll</HintPath>
+      <HintPath>..\..\packages\Freya.Router.1.0.185\lib\net45\Freya.Router.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Core">
@@ -152,23 +152,23 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Hekate">
-      <HintPath>..\..\packages\Hekate.0.3.0\lib\net40\Hekate.dll</HintPath>
+      <HintPath>..\..\packages\Hekate.1.0.0\lib\net40\Hekate.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Owin">
-      <HintPath>..\..\packages\Microsoft.Owin.3.0.0\lib\net45\Microsoft.Owin.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Owin.Diagnostics">
-      <HintPath>..\..\packages\Microsoft.Owin.Diagnostics.3.0.0\lib\net45\Microsoft.Owin.Diagnostics.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.Owin.Diagnostics.3.0.1\lib\net45\Microsoft.Owin.Diagnostics.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Owin.Host.HttpListener">
-      <HintPath>..\..\packages\Microsoft.Owin.Host.HttpListener.3.0.0\lib\net45\Microsoft.Owin.Host.HttpListener.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.Owin.Host.HttpListener.3.0.1\lib\net45\Microsoft.Owin.Host.HttpListener.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Owin.Hosting">
-      <HintPath>..\..\packages\Microsoft.Owin.Hosting.3.0.0\lib\net45\Microsoft.Owin.Hosting.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.Owin.Hosting.3.0.1\lib\net45\Microsoft.Owin.Hosting.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />

@@ -2,9 +2,9 @@
 module StaticFileServer.Prelude
 
 open System.IO
+open Arachne.Http
 open Freya.Core
 open Freya.Machine
-open Freya.Types.Http
 open Freya.Machine.Extensions.Http
 
 let root =

@@ -1,10 +1,9 @@
 ﻿module StaticFileServer.Stage1
 
+open Arachne.Http
 open Freya.Core
 open Freya.Core.Operators
 open Freya.Machine
-open Freya.Pipeline
-open Freya.Types.Http
 open Freya.Machine.Extensions.Http
 
 // Resources
