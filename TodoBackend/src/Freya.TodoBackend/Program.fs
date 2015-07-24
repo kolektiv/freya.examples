@@ -32,8 +32,6 @@ open Microsoft.Owin.Hosting
 
 type TodoBackend () =
     member __.Configuration () =
-        // TODO: Fix Inspectors, which are currently broken.
-        //OwinAppFunc.ofFreya (Api.api)
         OwinAppFunc.ofFreya (Api.todoRoutes)
 
 (* Main
