@@ -1,20 +1,12 @@
 ﻿module StaticFileServer.Program
 
 open Freya.Core
-open Freya.Core.Operators
-open Freya.Inspector
-open Freya.Machine.Inspector
 open Microsoft.Owin.Hosting
 
 // App
 
-let config =
-    { Inspectors = 
-        [ freyaRequestInspector
-          freyaMachineInspector ] }
-
 let app =
-    freyaInspector config >?= Stage4.files
+    Stage5.files
 
 // Katana
 
@@ -23,6 +15,7 @@ type FileServer () =
         OwinAppFunc.ofFreya app
 
 // Main
+
 [<EntryPoint>]
 let main _ = 
     let _ = WebApp.Start<FileServer> ("http://localhost:7000")

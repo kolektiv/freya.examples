@@ -26,14 +26,11 @@ open Arachne.Http.Cors
 open Arachne.Uri.Template
 open Freya.Core
 open Freya.Core.Operators
-open Freya.Inspector
 open Freya.Machine
 open Freya.Machine.Extensions.Http
 open Freya.Machine.Extensions.Http.Cors
-open Freya.Machine.Inspector
 open Freya.Machine.Router
 open Freya.Router
-open Freya.Router.Inspector
 open Freya.TodoBackend.Domain
 
 (* Route Properties
@@ -50,7 +47,7 @@ open Freya.TodoBackend.Domain
 
 let id =
     freya {
-        let! id = Freya.getLensPartial (Route.atom "id")
+        let! id = Freya.getLensPartial (Route.Atom_ "id")
         return (Option.get >> Guid.Parse) id } |> Freya.memo
 
 (* Body Properties
@@ -215,17 +212,6 @@ let todoRoutes =
         resource (UriTemplate.Parse "/") todos
         resource (UriTemplate.Parse "/{id}") todo } |> FreyaRouter.toPipeline
 
-(* Inspectors *)
-
-let config =
-    { Inspectors = 
-        [ freyaRequestInspector
-          freyaMachineInspector
-          freyaRouterInspector ] }
-
-let inspect =
-    freyaInspector config
-
 (* API
 
    Finally we expose our actual API. In more complex applications than this
@@ -233,4 +219,4 @@ let inspect =
    to form a more complex whole, but in this case we only have our single router. *)
 
 let api =
-    inspect >?= todoRoutes
+    todoRoutes
