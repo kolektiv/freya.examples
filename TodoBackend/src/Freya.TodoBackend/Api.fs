@@ -25,7 +25,6 @@ open Arachne.Http
 open Arachne.Http.Cors
 open Arachne.Uri.Template
 open Freya.Core
-open Freya.Core.Operators
 open Freya.Machine
 open Freya.Machine.Extensions.Http
 open Freya.Machine.Extensions.Http.Cors
@@ -47,7 +46,7 @@ open Freya.TodoBackend.Domain
 
 let id =
     freya {
-        let! id = Freya.getLensPartial (Route.Atom_ "id")
+        let! id = Freya.Lens.getPartial (Route.Atom_ "id")
         return (Option.get >> Guid.Parse) id } |> Freya.memo
 
 (* Body Properties

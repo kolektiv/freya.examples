@@ -1,7 +1,6 @@
 ﻿module StaticFileServer.Stage3
 
 open System.IO
-open Arachne.Http
 open Freya.Core
 open Freya.Core.Operators
 open Freya.Lenses.Http
@@ -19,7 +18,7 @@ let readFile (file: FileInfo) =
 
 // Response
 
-let represent (n: Specification) x =
+let represent _ x =
     { Description =
         { Charset = None
           Encodings = None
@@ -30,7 +29,7 @@ let represent (n: Specification) x =
 // Freya
 
 let path =
-    Freya.memo (Freya.getLens Request.Path_)
+    Freya.memo (Freya.Lens.get Request.Path_)
 
 let fileInfo =
     Freya.memo (getFileInfo <!> path)

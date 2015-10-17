@@ -27,9 +27,7 @@ open Arachne.Http
 open Arachne.Language
 open Chiron
 open Freya.Core
-open Freya.Core.Operators
 open Freya.Lenses.Http
-open Freya.Machine
 open Freya.Machine.Extensions.Http
 
 module Either =
@@ -97,7 +95,7 @@ let readStream (x: Stream) =
 
 let readBody =
     freya {
-        let! body = Freya.getLens Request.Body_
+        let! body = Freya.Lens.get Request.Body_
         return! Freya.fromAsync readStream body }
 
 let inline body () =

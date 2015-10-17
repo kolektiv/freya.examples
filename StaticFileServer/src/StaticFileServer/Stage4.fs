@@ -25,19 +25,19 @@ let fileTypes =
       ".json", MediaType.Json
       ".txt",  MediaType.Text ] |> Map.ofList
 
-let represent (n: Specification) x =
+let represent (spec: Specification) x =
     { Description =
         { Charset = None
           Encodings = None
           MediaType = Some ((function | Negotiated x -> List.head x 
-                                      | _ -> MediaType.Text) n.MediaTypes)
+                                      | _ -> MediaType.Text) spec.MediaTypes)
           Languages= None }
       Data = x }
 
 // Freya
 
 let path =
-    Freya.memo (Freya.getLens Request.Path_)
+    Freya.memo (Freya.Lens.get Request.Path_)
 
 let fileInfo =
     Freya.memo (getFileInfo <!> path)
