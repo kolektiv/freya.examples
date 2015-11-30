@@ -25,6 +25,7 @@ open Arachne.Http
 open Arachne.Http.Cors
 open Arachne.Language
 open Freya.Core
+open Freya.Core.Operators
 open Freya.Machine
 open Freya.Machine.Extensions.Http
 open Freya.Machine.Extensions.Http.Cors
@@ -45,9 +46,7 @@ open Freya.TodoBackend.Domain
    being matched which has an id, so it can be considered safe in this context. *)
 
 let id =
-    freya {
-        let! id = Freya.Optic.get (Route.atom_ "id")
-        return (Option.get >> Guid.Parse) id } |> Freya.Memo.wrap
+    (Option.get >> Guid.Parse) <!> Freya.Optic.get (Route.atom_ "id") |> Freya.Memo.wrap
 
 (* Body Properties
 
@@ -56,10 +55,10 @@ let id =
    inferring the type to be returned from the context in which they're used. *)
 
 let newTodo =
-    Freya.Memo.wrap (body ())
+    body () |> Freya.Memo.wrap
 
 let patchTodo =
-    Freya.Memo.wrap (body ())
+    body () |> Freya.Memo.wrap
 
 (* Domain Operations
 
@@ -73,33 +72,22 @@ let patchTodo =
    request, allowing us to use them as part of multiple decisions safely. *)
 
 let add =
-    freya {
-        let! newTodo = newTodo
-        return! (Freya.fromAsync addTodo) newTodo.Value } |> Freya.Memo.wrap
+    Freya.fromAsync addTodo =<< (Option.get <!> newTodo) |> Freya.Memo.wrap
 
 let clear =
-    freya {
-        return! (Freya.fromAsync clearTodos) () } |> Freya.Memo.wrap
+    Freya.fromAsync clearTodos =<< Freya.init () |> Freya.Memo.wrap
 
 let delete =
-    freya {
-        let! id = id
-        return! (Freya.fromAsync deleteTodo) id } |> Freya.Memo.wrap
+    Freya.fromAsync deleteTodo =<< id |> Freya.Memo.wrap
 
 let get =
-    freya {
-        let! id = id
-        return! (Freya.fromAsync getTodo) id } |> Freya.Memo.wrap
+    Freya.fromAsync getTodo =<< id |> Freya.Memo.wrap
 
 let list =
-    freya {
-        return! (Freya.fromAsync listTodos) () } |> Freya.Memo.wrap
+    Freya.fromAsync listTodos =<< Freya.init () |> Freya.Memo.wrap
 
 let update =
-    freya {
-        let! id = id
-        let! patchTodo = patchTodo
-        return! (Freya.fromAsync updateTodo) (id, patchTodo.Value) } |> Freya.Memo.wrap
+    Freya.fromAsync updateTodo =<< (tuple <!> id <*> (Option.get <!> patchTodo)) |> Freya.Memo.wrap
 
 (* Machine
 
@@ -114,40 +102,29 @@ let update =
    Finally we define our two resources, the first for the collection of Todos,
    the second for an individual Todo. *)
 
-let addAction =
-    freya {
-        let! _ = add
-        return () }
+let empty =
+    fun _ -> ()
 
-let addedHandler =
-    freya {
-        let! todo = add
-        return represent todo }
+let addAction =
+    empty <!> add
+
+let addHandler =
+    represent <!> add
 
 let clearAction =
-    freya {
-        let! _ = clear
-        return () }
+    empty <!> clear
 
 let deleteAction =
-    freya {
-        let! _ = delete
-        return () }
+    empty <!> delete
 
 let getHandler =
-    freya {
-        let! todo = get
-        return represent todo }
+    represent <!> get
 
 let listHandler =
-    freya {
-        let! todos = list
-        return represent todos }
+    represent <!> list
 
 let updateAction =
-    freya {
-        let! _ = update
-        return () }
+    empty <!> update
 
 let common =
     freyaMachine {
@@ -165,7 +142,7 @@ let todos =
         methodsSupported [ DELETE; GET; OPTIONS; POST ]
         doDelete clearAction
         doPost addAction
-        handleCreated addedHandler
+        handleCreated addHandler
         handleOk listHandler }
 
 let todo =
