@@ -23,7 +23,7 @@ module Freya.TodoBackend.Api
 open System
 open Arachne.Http
 open Arachne.Http.Cors
-open Arachne.Uri.Template
+open Arachne.Language
 open Freya.Core
 open Freya.Machine
 open Freya.Machine.Extensions.Http
@@ -119,7 +119,7 @@ let addAction =
         let! _ = add
         return () }
 
-let addedHandler _ =
+let addedHandler =
     freya {
         let! todo = add
         return represent todo }
@@ -134,12 +134,12 @@ let deleteAction =
         let! _ = delete
         return () }
 
-let getHandler _ =
+let getHandler =
     freya {
         let! todo = get
         return represent todo }
 
-let listHandler _ =
+let listHandler =
     freya {
         let! todos = list
         return represent todos }
@@ -149,52 +149,29 @@ let updateAction =
         let! _ = update
         return () }
 
-let corsOrigins =
-    freya {
-        return AccessControlAllowOriginRange.Any }
-
-let corsHeaders =
-    freya {
-        return [ "accept"
-                 "content-type" ] }
-
 let common =
     freyaMachine {
         using http
         using httpCors
-        charsetsSupported utf8
-        corsHeadersSupported corsHeaders
-        corsOriginsSupported corsOrigins
-        languagesSupported en
-        mediaTypesSupported json }
-
-let todosMethods =
-    Freya.init [ DELETE
-                 GET
-                 OPTIONS
-                 POST ]
+        charsetsSupported Charset.Utf8
+        corsHeadersSupported [ "accept"; "content-type" ]
+        corsOriginsSupported AccessControlAllowOriginRange.Any
+        languagesSupported (LanguageTag.Parse "en")
+        mediaTypesSupported MediaType.Json }
 
 let todos =
     freyaMachine {
         including common
-        corsMethodsSupported todosMethods
-        methodsSupported todosMethods
+        methodsSupported [ DELETE; GET; OPTIONS; POST ]
         doDelete clearAction
         doPost addAction
         handleCreated addedHandler
         handleOk listHandler }
 
-let todoMethods =
-    Freya.init [ DELETE
-                 GET
-                 OPTIONS
-                 Method.Custom "PATCH" ]
-
 let todo =
     freyaMachine {
         including common
-        corsMethodsSupported todoMethods
-        methodsSupported todoMethods
+        methodsSupported [ DELETE; GET; OPTIONS; Method.Custom "PATCH" ]
         doDelete deleteAction
         doPatch updateAction
         handleOk getHandler }
@@ -208,8 +185,8 @@ let todo =
 
 let todoRoutes =
     freyaRouter {
-        resource (UriTemplate.Parse "/") todos
-        resource (UriTemplate.Parse "/{id}") todo }
+        resource "/" todos
+        resource "/{id}" todo }
 
 (* API
 

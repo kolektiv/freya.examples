@@ -65,19 +65,6 @@ module Either =
 let tuple x y =
     x, y
 
-(* Presets
-
-   It's often useful/neater when working with freya to write some shorthand
-   properties for some of the arguments to freyaMachine computation operations.
-   It saves having to use (freya { ... }) in multiple places within the
-   computation expression, which can reduce duplication and help readability. *)
-
-let en = Freya.init [ LanguageTag.Parse "en" ]
-
-let json = Freya.init [ MediaType.Json ]
-
-let utf8 = Freya.init [ Charset.Utf8 ]
-
 (* Request Body Helper
 
    Freya doesn't provide built-in ways of extracting data from the body of
