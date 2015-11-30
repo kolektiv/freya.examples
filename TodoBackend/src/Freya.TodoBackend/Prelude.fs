@@ -95,7 +95,7 @@ let readStream (x: Stream) =
 
 let readBody =
     freya {
-        let! body = Freya.Lens.get Request.Body_
+        let! body = Freya.Optic.get Request.body_
         return! Freya.fromAsync readStream body }
 
 let inline body () =

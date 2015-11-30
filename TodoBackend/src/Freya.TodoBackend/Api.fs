@@ -46,8 +46,8 @@ open Freya.TodoBackend.Domain
 
 let id =
     freya {
-        let! id = Freya.Lens.getPartial (Route.Atom_ "id")
-        return (Option.get >> Guid.Parse) id } |> Freya.memo
+        let! id = Freya.Optic.get (Route.atom_ "id")
+        return (Option.get >> Guid.Parse) id } |> Freya.Memo.wrap
 
 (* Body Properties
 
@@ -56,10 +56,10 @@ let id =
    inferring the type to be returned from the context in which they're used. *)
 
 let newTodo =
-    Freya.memo (body ())
+    Freya.Memo.wrap (body ())
 
 let patchTodo =
-    Freya.memo (body ())
+    Freya.Memo.wrap (body ())
 
 (* Domain Operations
 
@@ -75,31 +75,31 @@ let patchTodo =
 let add =
     freya {
         let! newTodo = newTodo
-        return! (Freya.fromAsync addTodo) newTodo.Value } |> Freya.memo
+        return! (Freya.fromAsync addTodo) newTodo.Value } |> Freya.Memo.wrap
 
 let clear =
     freya {
-        return! (Freya.fromAsync clearTodos) () } |> Freya.memo
+        return! (Freya.fromAsync clearTodos) () } |> Freya.Memo.wrap
 
 let delete =
     freya {
         let! id = id
-        return! (Freya.fromAsync deleteTodo) id } |> Freya.memo
+        return! (Freya.fromAsync deleteTodo) id } |> Freya.Memo.wrap
 
 let get =
     freya {
         let! id = id
-        return! (Freya.fromAsync getTodo) id } |> Freya.memo
+        return! (Freya.fromAsync getTodo) id } |> Freya.Memo.wrap
 
 let list =
     freya {
-        return! (Freya.fromAsync listTodos) () } |> Freya.memo
+        return! (Freya.fromAsync listTodos) () } |> Freya.Memo.wrap
 
 let update =
     freya {
         let! id = id
         let! patchTodo = patchTodo
-        return! (Freya.fromAsync updateTodo) (id, patchTodo.Value) } |> Freya.memo
+        return! (Freya.fromAsync updateTodo) (id, patchTodo.Value) } |> Freya.Memo.wrap
 
 (* Machine
 
@@ -182,7 +182,7 @@ let todos =
         doDelete clearAction
         doPost addAction
         handleCreated addedHandler
-        handleOk listHandler } |> FreyaMachine.toPipeline
+        handleOk listHandler }
 
 let todoMethods =
     Freya.init [ DELETE
@@ -197,7 +197,7 @@ let todo =
         methodsSupported todoMethods
         doDelete deleteAction
         doPatch updateAction
-        handleOk getHandler } |> FreyaMachine.toPipeline
+        handleOk getHandler }
 
 (* Router
 
@@ -209,7 +209,7 @@ let todo =
 let todoRoutes =
     freyaRouter {
         resource (UriTemplate.Parse "/") todos
-        resource (UriTemplate.Parse "/{id}") todo } |> FreyaRouter.toPipeline
+        resource (UriTemplate.Parse "/{id}") todo }
 
 (* API
 
